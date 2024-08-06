@@ -1,30 +1,38 @@
 from flask import Blueprint, request, jsonify, current_app
 from ..utils.comfyUI import make_comfyUI_request
-
-from ..utils.mongo import insert_outputs, get_db, insert_run_workflow
+from ..utils.mongo import insert_outputs, get_db, insert_run_workflow, find_base_workflow, find_quality_assessment
 from ..utils.outputs import Outputs
 from ..utils.tuneParams import label_workflow_for_random_sampling, prepare_run_workflow
+from ..utils.tuneParams import update_ranges_by_quality_control
 from ..utils.utils import get_output_paths, new_outputs
 
-start_run_bp = Blueprint('startRun', __name__)
+rerun_bp = Blueprint('rerun', __name__)
 
-@start_run_bp.route('/api/startRun', methods=['GET'])
-def start_run():
+@rerun_bp.route('/api/rerun', methods=['POST'])
+def rerun():
     if not request.is_json:
         return jsonify({"error": "No valid run data was supplied, please upload a workflow/prompt"}), 400
     try:
-        base_workflow = request['base_workflow']
-        num_runs = request['num_runs']
+        data = request.get_json()
+        base_workflow_id = data['base_workflow_id']
+        run_workflow_ids = data['run_workflow_ids']
+        threshold = data['threshold']
+        num_runs = data['num_runs']
+
+        db = get_db()
+
+        base_workflow = find_base_workflow(db, base_workflow_id)
+        if not base_workflow:
+            return jsonify({"error": "Base workflow not found"}), 404
+    
+        updated_base_workflow = update_ranges_by_quality_control(run_workflow_ids, base_workflow, threshold, db)
+
+        labeled_base_workflow = label_workflow_for_random_sampling(updated_base_workflow)
+
+        run_workflows = [prepare_run_workflow(labeled_base_workflow) for _ in range(num_runs)]
 
         results = []
-        ##TODO Check if comfy server is running, if not start
-        
-        db = get_db()
         before_outputs = get_output_paths()
-
-        base_workflow = label_workflow_for_random_sampling(base_workflow)
-
-        run_workflows = [prepare_run_workflow(base_workflow) for _ in range(num_runs)]
 
         for run_workflow in run_workflows:
             prompt_result = make_comfyUI_request(run_workflow, current_app.config['COMFYUI_ADDRESS'])

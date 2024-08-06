@@ -1,19 +1,19 @@
 import os
 
-from mongo import find_workflow, get_db
+from mongo import find_run_workflow, get_db
 
 class Outputs:
-    def __init__(self, workflow_id, paths):
-        self.workflow_id = workflow_id
+    def __init__(self, run_workflow_id, paths):
+        self.run_workflow_id = run_workflow_id
         self.paths = paths
 
     @property
-    def workflow_id(self):
-        return self._workflow_id
+    def run_workflow_id(self):
+        return self._run_workflow_id
 
-    @workflow_id.setter
-    def workflow_id(self, value):
-        self._workflow_id = value
+    @run_workflow_id.setter
+    def run_workflow_id(self, value):
+        self._run_workflow_id = value
         self.validate_workflow_exists()
 
     @property
@@ -32,6 +32,6 @@ class Outputs:
 
     def validate_workflow_exists(self):
         db = get_db()
-        workflow = find_workflow(db=db, workflow_id=self._workflow_id)
-        if workflow is None:
-            raise ValueError(f"Workflow ID does not exist: {self._workflow_id}")
+        run_workflow = find_run_workflow(db=db, run_workflow_id=self._run_workflow_id)
+        if run_workflow is None:
+            raise ValueError(f"Run Workflow ID does not exist: {self._run_workflow_id}")

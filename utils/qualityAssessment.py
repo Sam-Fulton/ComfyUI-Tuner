@@ -1,22 +1,22 @@
 import os
-from mongo import get_db, find_workflow
+from mongo import get_db, find_run_workflow
 
 class QualityAssessment:
-    def __init__(self, workflow_id, path, quality_assessment):
-        self.workflow_id = workflow_id
+    def __init__(self, run_workflow_id, path, quality_assessment):
+        self.run_workflow_id = run_workflow_id
         self.path = path
         self.quality_assessment = quality_assessment
 
     @property
-    def workflow_id(self):
-        return self._workflow_id
+    def run_workflow_id(self):
+        return self.run_workflow_id
 
-    @workflow_id.setter
-    def workflow_id(self, value):
-        workflow = find_workflow(db=get_db(), workflow_id=value)
-        if workflow is None:
+    @run_workflow_id.setter
+    def run_workflow_id(self, value):
+        run_workflow = find_run_workflow(db=get_db(), run_workflow_id=value)
+        if run_workflow is None:
             raise ValueError("There is no workflow that currently exists with that id")
-        self._workflow_id = value
+        self.run_workflow_id = value
 
     @property
     def path(self):

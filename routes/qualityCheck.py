@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify, current_app
-from ..utils.mongo import insert_quality_review, find_workflow, get_db
+from flask import Blueprint, request, jsonify
+from ..utils.mongo import insert_quality_review, get_db
 from ..utils.qualityAssessment import QualityAssessment
 
 quality_check_bp = Blueprint('qualityCheck', __name__)
@@ -12,10 +12,11 @@ def quality_check():
         db = get_db()
         
         quality_assessment = QualityAssessment(
-            workflow_id=image_quality['workflow_id'],
+            workflow_id=image_quality['run_workflow_id'],
             path=image_quality['path'],
             quality_assessment=image_quality['quality_assessment']
         )
+
         insert_quality_review(db=db, quality_assessment=quality_assessment)
 
         return jsonify({"message": "Quality assessment for image saved"}), 200

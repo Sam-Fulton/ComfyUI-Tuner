@@ -4,13 +4,13 @@ import uuid
 import json
 import urllib.request
 
-def make_comfyUI_request(workflow, server_address):
+def make_comfyUI_request(run_workflow, server_address):
     try:
         ws, client_id = open_websocket_connection(server_address)
         if not ws:
             raise ConnectionError(f"Failed to connect to the WebSocket server at {server_address}")
 
-        prompt_result = queue_prompt(workflow, client_id, server_address)
+        prompt_result = queue_prompt(run_workflow, client_id, server_address)
         ws.close()
 
         return prompt_result
