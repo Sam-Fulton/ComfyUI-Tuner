@@ -15,29 +15,37 @@ def start_run():
         
         base_workflow = request.json['base_workflow']
 
-        num_runs = request.json['num_runs']
+        if "value" in base_workflow and len(base_workflow.keys()) == 1:
+            base_workflow = base_workflow['value']
+
+        num_runs = int(request.json['num_runs'])
+
+        print(f'num_runs: {num_runs}')
 
         results = []
         ##TODO Check if comfy server is running, if not start
         
         print("got request")
 
+        print(base_workflow, flush=True)
+
         db = get_db()
-        before_outputs = get_output_paths(base_workflow)
-        
-        print("output paths got", flush=True)
 
         base_workflow = label_workflow_for_random_sampling(base_workflow)
 
         print(f"workflow prepared: {base_workflow}", flush=True)
 
-        run_workflows = [prepare_run_workflow(base_workflow) for _ in range(num_runs)]
+        run_workflows = [prepare_run_workflow(base_workflow) for _ in range((num_runs))]
         
         print("run workflows prepared", flush=True)
 
         print(len(run_workflows), flush=True)
 
         for run_workflow in run_workflows:
+            before_outputs = get_output_paths(base_workflow)
+        
+            print("output paths got", flush=True)
+            
             print(f"run workflow: {run_workflow}", flush=True)
             make_comfyUI_request(run_workflow, current_app.config['COMFYUI_ADDRESS'])
             print("COMFYUI request finished", flush=True)
@@ -69,7 +77,7 @@ def start_run():
                 })
 
         print(f"results: {results}", flush=True)
-        
+
         return jsonify({"message": "Workflows processed successfully", "results": results}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
