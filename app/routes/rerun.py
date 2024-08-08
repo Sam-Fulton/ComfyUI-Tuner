@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify, current_app
-from ..utils.comfyUI import make_comfyUI_request
-from ..utils.mongo import insert_outputs, get_db, insert_run_workflow, find_base_workflow, find_quality_assessment
-from ..utils.outputs import Outputs
-from ..utils.tuneParams import label_workflow_for_random_sampling, prepare_run_workflow
-from ..utils.tuneParams import update_ranges_by_quality_control
-from ..utils.utils import get_output_paths, new_outputs
+from utils.comfyUI import make_comfyUI_request
+from utils.mongo import insert_outputs, get_db, insert_run_workflow, find_base_workflow, find_quality_assessment
+from utils.outputs import Outputs
+from utils.tuneParams import label_workflow_for_random_sampling, prepare_run_workflow
+from utils.tuneParams import update_ranges_by_quality_control
+from utils.utils import get_output_paths, new_outputs
 
 rerun_bp = Blueprint('rerun', __name__)
 
@@ -14,10 +14,10 @@ def rerun():
         return jsonify({"error": "No valid run data was supplied, please upload a workflow/prompt"}), 400
     try:
         data = request.get_json()
-        base_workflow_id = data['base_workflow_id']
-        run_workflow_ids = data['run_workflow_ids']
-        threshold = data['threshold']
-        num_runs = data['num_runs']
+        base_workflow_id = data.json['base_workflow_id']
+        run_workflow_ids = data.json['run_workflow_ids']
+        threshold = data.json['threshold']
+        num_runs = data.json['num_runs']
 
         db = get_db()
 

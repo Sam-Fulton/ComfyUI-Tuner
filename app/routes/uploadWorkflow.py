@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from ..utils.mongo import get_db, insert_base_workflow
+from utils.mongo import get_db, insert_base_workflow
 
 upload_workflow_bp = Blueprint('uploadWorkflow', __name__)
 
@@ -10,6 +10,7 @@ def upload_workflow():
     
     try:
         workflow_data = request.get_json()
+        print(workflow_data)
         insert_base_workflow(db=get_db(), workflow_data=workflow_data)
         return jsonify({"message": "Workflow successfully added"}), 200
     

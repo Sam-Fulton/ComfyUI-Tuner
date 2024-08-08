@@ -1,6 +1,6 @@
 import os
 
-from mongo import find_run_workflow, get_db
+from .mongo import find_run_workflow, get_db
 
 class Outputs:
     def __init__(self, run_workflow_id, paths):

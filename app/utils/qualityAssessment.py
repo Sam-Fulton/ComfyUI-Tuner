@@ -1,5 +1,5 @@
 import os
-from mongo import get_db, find_run_workflow
+from .mongo import get_db, find_run_workflow
 
 class QualityAssessment:
     def __init__(self, run_workflow_id, path, quality_assessment):

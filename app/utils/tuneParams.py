@@ -1,6 +1,6 @@
 import random
-from ..utils.mongo import find_quality_assessments_by_run_workflow_id, find_run_workflow
-from ..utils.qualityAssessment import QualityAssessment
+from utils.mongo import find_quality_assessments_by_run_workflow_id, find_run_workflow
+from utils.qualityAssessment import QualityAssessment
 
 def label_workflow_for_random_sampling(base_workflow):
     for k in base_workflow.keys():
@@ -20,8 +20,11 @@ def label_workflow_for_random_sampling(base_workflow):
                             base_workflow[k]['inputs'][input_key] = {"type": "discrete", "values": input_value}
                         else:
                             base_workflow[k]['inputs'][input_key] = {"type": "range", "values": input_value}
+        
+    return base_workflow
 
-def prepare_run_workflow(base_workflow):
+def prepare_run_workflow(base_workflow): 
+    print(base_workflow, flush=True)
     for k in base_workflow.keys():
         inputs = base_workflow[k]['inputs']
         for input_key, input_value in inputs.items():
@@ -33,7 +36,8 @@ def prepare_run_workflow(base_workflow):
                         base_workflow[k]['inputs'][input_key] = random.randint(input_value["values"][0], input_value["values"][1])
                     elif all(isinstance(v, float) for v in input_value["values"]):
                         base_workflow[k]['inputs'][input_key] = random.uniform(input_value["values"][0], input_value["values"][1])
-
+    
+    return base_workflow
 
 def update_ranges_by_quality_control(run_workflow_ids, base_workflow, threshold, db):
     combined_good_assessments = {}

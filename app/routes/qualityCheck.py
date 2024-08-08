@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from ..utils.mongo import insert_quality_review, get_db
-from ..utils.qualityAssessment import QualityAssessment
+from utils.mongo import insert_quality_review, get_db
+from utils.qualityAssessment import QualityAssessment
 
 quality_check_bp = Blueprint('qualityCheck', __name__)
 
