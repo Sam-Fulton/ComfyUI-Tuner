@@ -63,9 +63,9 @@ def fetch_run_workflows(db):
 def insert_quality_review(db, quality_assessment):
     quality_assessment_collection = db['quality_assessment']
     result = quality_assessment_collection.insert_one({
-        "run_workflow_id": quality_assessment.run_workflow_id,
-        "quality_assessment": quality_assessment.quality_assessment,
-        "path": quality_assessment.path
+        "run_workflow_id": quality_assessment._run_workflow_id,
+        "quality_assessment": quality_assessment._quality_assessment,
+        "path": quality_assessment._path
     })
     return str(result.inserted_id)
 
@@ -82,6 +82,21 @@ def find_quality_assessments_by_run_workflow_id(db, run_workflow_id):
     for qa in quality_assessments:
         qa['_id'] = str(qa['_id'])
     return quality_assessments
+
+def find_quality_assessments_by_run_workflow_id_path(db, run_workflow_id, path):
+    quality_assessment_collection = db['quality_assessment']
+    quality_assessments = list(quality_assessment_collection.find({'run_workflow_id': run_workflow_id, 'path': path}))
+    for qa in quality_assessments:
+        qa['_id'] = str(qa['_id'])
+    return quality_assessments
+
+def update_quality_assessment(db, run_workflow_id, path, quality_assessment):
+    quality_assessment_collection = db['quality_assessment']
+    result = quality_assessment_collection.update_one(
+        {"run_workflow_id": run_workflow_id, "path": path},
+        {"$set": {"quality_assessment": quality_assessment}}
+    )
+    return result.modified_count > 0
 
 def insert_outputs(db, outputs):
     outputs_collection = db['outputs']
