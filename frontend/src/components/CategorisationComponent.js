@@ -18,7 +18,7 @@ const CategorisationComponent = ({ outputs, resetImageSelection }) => {
 
     useEffect(() => {
         if (resetImageSelection) {
-            setSelectedImage(null); // Reset selected image when instructed
+            setSelectedImage(null);
         }
     }, [resetImageSelection]);
 

@@ -138,19 +138,16 @@ const AnalysisPage = () => {
             return paramCounts;
         }
 
-        const nodes = selectedBaseWorkflow.value.value;
-        console.log("Processing nodes in the selected base workflow:", nodes);
+        const nodes = selectedBaseWorkflow.value;
 
         for (const k in nodes) {
             if (nodes.hasOwnProperty(k)) {
                 const classType = nodes[k]?.class_type;
                 const inputs = nodes[k]?.inputs;
-                console.log(`Node ${k} (${classType}):`, inputs);
                 processNodeInput(inputs, k, paramCounts, runWorkflows, qualityAssessments);
             }
         }
 
-        console.log("Final parameter counts:", paramCounts);
         return paramCounts;
     };
 
@@ -196,8 +193,11 @@ const AnalysisPage = () => {
     
         axios.post('http://127.0.0.1:5000/api/rerun_workflow', payload)
             .then(response => {
-                console.log(response);
-                setEditedWorkflow(response.data.updated_workflow);
+                console.log("Rerun response received:", response.data.updated_workflow);
+                setEditedWorkflow(prevWorkflow => ({
+                    ...prevWorkflow,
+                    value: response.data.updated_workflow
+                }));
                 alert('Parameter ranges updated, please check the suggested workflow.');
             })
             .catch(error => {

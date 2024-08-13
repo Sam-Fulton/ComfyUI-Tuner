@@ -18,17 +18,16 @@ def rerun():
         db = get_db()
 
         base_workflow = find_base_workflow(db, base_workflow_id)
-        print(base_workflow, flush=True)
         if not base_workflow:
             return jsonify({"error": "Base workflow not found"}), 400
 
         updated_base_workflow = update_ranges_by_quality_control(run_workflow_ids, base_workflow, threshold, db)
 
-        print(f"UPDATED BASE WORKFLOW {updated_base_workflow}", flush=True)
+        response = {'updated_workflow': updated_base_workflow}
 
-        payload = {'updated_workflow': updated_base_workflow}
-
-        return jsonify(payload), 200
+        print(f"RESPONSE {response}")
+        
+        return jsonify(response), 200
     
     except ValueError as e:
         return jsonify({"error": str(e)}), 400

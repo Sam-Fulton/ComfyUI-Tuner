@@ -64,10 +64,8 @@ const SingleParameterChart = ({ paramName, paramData }) => {
 const ParameterChart = ({ getParameterCounts }) => {
     const paramCounts = getParameterCounts();
     
-    // Debugging: log the paramCounts to verify structure
     console.log("Parameter Counts:", paramCounts);
 
-    // If paramCounts is empty or undefined, render a message
     if (!paramCounts || Object.keys(paramCounts).length === 0) {
         return <p>No parameter data available.</p>;
     }
