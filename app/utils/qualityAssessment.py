@@ -9,7 +9,7 @@ class QualityAssessment:
 
     @property
     def run_workflow_id(self):
-        return self.run_workflow_id
+        return self._run_workflow_id
 
     @run_workflow_id.setter
     def run_workflow_id(self, value: str):

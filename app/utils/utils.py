@@ -3,7 +3,6 @@ from bson import ObjectId
 
 def get_output_paths(run_workflow):
     comfyui_base_dir = "/app/ComfyUI/output"
-    print(comfyui_base_dir, flush=True)
     output_files = []
 
     for k in run_workflow.keys():
@@ -16,13 +15,6 @@ def get_output_paths(run_workflow):
                 if 'filename' in input_key and isinstance(input_value, str):
                     output_path = os.path.join(comfyui_base_dir, input_value)
                     output_dir = os.path.dirname(output_path)
-
-                    print(f"Output location: {output_dir}")
-                    
-                    if os.path.exists(output_dir):
-                        print(output_dir, flush=True)
-                    else:
-                        print(f"doesn't exist : {output_dir}", flush=True)
                     
                     if output_dir and os.path.exists(output_dir):
                         for root, _, files in os.walk(output_dir):

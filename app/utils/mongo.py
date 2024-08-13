@@ -16,9 +16,9 @@ def get_db():
         print(f"An error occurred while connection to mongo: {e}")
         return None
 
-def insert_run_workflow(db, workflow_data):
+def insert_run_workflow(db, workflow_data, base_workflow_id, group_timestamp):
     workflow_collection = db['run_workflows']
-    workflow_document = {'value': workflow_data}
+    workflow_document = {'base_workflow_id': base_workflow_id, 'value': workflow_data, 'group_timestamp': group_timestamp}
     result = workflow_collection.insert_one(workflow_document)
     return str(result.inserted_id)
 
@@ -42,6 +42,16 @@ def find_base_workflow(db, base_workflow_id):
         return workflow_document.get('value')
     return None
 
+def update_base_workflow(db, base_workflow_id, updated_workflow_data):
+    workflow_collection = db['base_workflows']
+    
+    result = workflow_collection.update_one(
+        {'_id': ObjectId(base_workflow_id)},
+        {'$set': {'value': updated_workflow_data}}
+    )
+    
+    return result.matched_count > 0
+
 def fetch_base_workflows(db):
     try:
         workflow_collection = db['base_workflows']
@@ -60,12 +70,19 @@ def fetch_run_workflows(db):
         workflows.append(workflow_document)
     return workflows
 
+def fetch_run_workflows_by_base_workflow_id(db, base_workflow_id):
+    workflow_collection = db['run_workflows']
+    workflows = []
+    for workflow_document in workflow_collection.find({'base_workflow_id': base_workflow_id}):
+        workflows.append(workflow_document)
+    return workflows
+
 def insert_quality_review(db, quality_assessment):
     quality_assessment_collection = db['quality_assessment']
     result = quality_assessment_collection.insert_one({
-        "run_workflow_id": quality_assessment._run_workflow_id,
-        "quality_assessment": quality_assessment._quality_assessment,
-        "path": quality_assessment._path
+        "run_workflow_id": quality_assessment.run_workflow_id,
+        "quality_assessment": quality_assessment.quality_assessment,
+        "path": quality_assessment.path
     })
     return str(result.inserted_id)
 
@@ -81,6 +98,14 @@ def find_quality_assessments_by_run_workflow_id(db, run_workflow_id):
     quality_assessments = list(quality_assessment_collection.find({'run_workflow_id': run_workflow_id}))
     for qa in quality_assessments:
         qa['_id'] = str(qa['_id'])
+    return quality_assessments
+
+def find_quality_assessments_by_run_workflow_ids(db, run_workflow_ids):
+    quality_assessment_collection = db['quality_assessment']
+    ids = [id for id in run_workflow_ids]
+    quality_assessments = list(quality_assessment_collection.find({'run_workflow_id': {'$in': ids}}))
+    for qa in quality_assessments:
+        qa['_id'] = str(qa['_id'])    
     return quality_assessments
 
 def find_quality_assessments_by_run_workflow_id_path(db, run_workflow_id, path):
