@@ -96,20 +96,27 @@ th {
   color: white;
 }
 
-.navbar {
+nav {
   background-color: #007bff;
   padding: 10px;
   color: white;
 }
 
-.navbar a {
+nav a {
   color: white;
-  padding: 14px 20px;
+  padding: 10px 15px;
   text-decoration: none;
-  display: inline-block;
+  font-weight: bold;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  margin-left: 10px;
 }
 
-.navbar a:hover {
+nav a:first-child {
+  margin-left: 0;
+}
+
+nav a:hover {
   background-color: #0056b3;
 }
 
@@ -117,5 +124,8 @@ footer {
   background-color: #007bff;
   color: white;
   text-align: center;
-  padding: 10
+  padding: 10px;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
 }

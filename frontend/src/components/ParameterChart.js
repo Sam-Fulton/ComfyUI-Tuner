@@ -23,8 +23,8 @@ const SingleParameterChart = ({ paramName, paramData }) => {
     const chartRef = useRef(null);
 
     const labels = Object.keys(paramData);
-    const goodData = labels.map(label => paramData[label].good);
-    const badData = labels.map(label => paramData[label].bad);
+    const goodData = labels.map(label => paramData[label].good || 0);
+    const badData = labels.map(label => paramData[label].bad || 0);
 
     const data = {
         labels: labels,

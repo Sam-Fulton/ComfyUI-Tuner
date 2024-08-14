@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './styles/WorkflowEditorComponent.css';
 
 const WorkflowEditorComponent = ({ workflow, onSave }) => {
     const [jsonString, setJsonString] = useState('');

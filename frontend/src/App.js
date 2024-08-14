@@ -14,7 +14,7 @@ const App = () => {
                     <Link to="/">Upload Workflow</Link>
                     <Link to="/categorisation" style={{ marginLeft: '10px' }}>Categorisation Page</Link>
                     <Link to="/run" style={{ marginLeft: '10px' }}>Run Page</Link>
-                    <Link to="/analysis" style={{ marginLeft: '10px' }}>analysis Page</Link>
+                    <Link to="/analysis" style={{ marginLeft: '10px' }}>Analysis Page</Link>
                 </nav>
                 <Routes>
                     <Route path="/" element={<UploadWorkflowPage />} />
