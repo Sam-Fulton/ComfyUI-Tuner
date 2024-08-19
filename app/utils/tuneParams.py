@@ -1,7 +1,7 @@
 import random
 import copy
-from utils.mongo import find_quality_assessments_by_run_workflow_id, find_run_workflow
-from utils.qualityAssessment import QualityAssessment
+from .mongo import find_quality_assessments_by_run_workflow_id, find_run_workflow
+from .qualityAssessment import QualityAssessment
 
 def label_workflow_for_random_sampling(base_workflow):
     for k in base_workflow.keys():
@@ -34,7 +34,6 @@ def label_workflow_for_random_sampling(base_workflow):
 
 def prepare_run_workflow(base_workflow): 
     run_workflow = copy.deepcopy(base_workflow)
-    print(run_workflow, flush=True)
     for k in run_workflow.keys():
         inputs = run_workflow[k]['inputs']
         for input_key, input_value in inputs.items():
@@ -89,7 +88,10 @@ def combine_differing_inputs(good_workflows):
     return combined_assessments
 
 def convert_and_adjust_values(base_workflow, combined_assessments):
-    base_workflow_value = base_workflow['value']
+    if 'value' in base_workflow.keys():
+        base_workflow_value = base_workflow['value']
+    else:
+        base_workflow_value = base_workflow
 
     for node_key in base_workflow_value.keys():
         inputs = base_workflow_value[node_key]['inputs']
@@ -136,4 +138,5 @@ def update_ranges_by_quality_control(run_workflow_ids, base_workflow, threshold,
     good_workflows = filter_good_workflows(run_workflow_ids, threshold, db)
     combined_assessments = combine_differing_inputs(good_workflows)
     updated_base_workflow = convert_and_adjust_values(base_workflow, combined_assessments)
+
     return updated_base_workflow

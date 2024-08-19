@@ -23,7 +23,7 @@ def get_output_paths(run_workflow):
                                 print(file, flush=True)
                                 output_files.append(os.path.join(root, file))
 
-    return output_files
+    return list(set(output_files))
 
 def new_outputs(before_outputs, after_outputs):
     return list(set(after_outputs) - set(before_outputs))

@@ -78,16 +78,12 @@ def track_progress(prompt, ws, prompt_id, server_address):
             if re.search(prompt_executed_pattern, message):
                 print("Prompt executed")
                 break
-        else:
-            continue
 
         queue_status = check_queue_status(server_address)
         if queue_status is not None:
             if queue_status['queue_running'] == [] and queue_status['queue_pending'] == []:
                 print("Queue is empty, all tasks are done", flush=True)
                 break
-
-    return
 
 def check_queue_status(server_address):
     try:
