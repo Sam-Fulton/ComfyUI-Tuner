@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from utils.mongo import fetch_run_workflows, get_db
-from utils.utils import convert_objectid_to_str
+from app.utils.mongo import fetch_run_workflows, get_db
+from app.utils.utils import convert_objectid_to_str
 
 get_run_workflows_bp = Blueprint('getRunWorkflows', __name__)
 

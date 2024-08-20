@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from utils.mongo import find_outputs_by_run_workflow_id, get_db, find_run_workflow
+from app.utils.mongo import find_outputs_by_run_workflow_id, get_db, find_run_workflow
 
 get_outputs_bp = Blueprint('getOutputs', __name__)
 

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from utils.mongo import get_db, insert_base_workflow
+from app.utils.mongo import get_db, insert_base_workflow
 
 upload_workflow_bp = Blueprint('uploadWorkflow', __name__)
 

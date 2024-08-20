@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from utils.mongo import get_db, find_quality_assessments_by_run_workflow_ids
+from app.utils.mongo import get_db, find_quality_assessments_by_run_workflow_ids
 
 get_quality_assessment_by_run_workflow_bp = Blueprint('getQualityAssessmentByRunWorkflow', __name__)
 

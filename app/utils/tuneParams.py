@@ -1,7 +1,7 @@
 import random
 import copy
-from .mongo import find_quality_assessments_by_run_workflow_id, find_run_workflow
-from .qualityAssessment import QualityAssessment
+from app.utils.mongo import find_quality_assessments_by_run_workflow_id, find_run_workflow
+from app.utils.qualityAssessment import QualityAssessment
 
 def label_workflow_for_random_sampling(base_workflow):
     for k in base_workflow.keys():

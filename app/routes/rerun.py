@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from utils.mongo import get_db, find_base_workflow
-from utils.tuneParams import update_ranges_by_quality_control
+from app.utils.mongo import get_db, find_base_workflow
+from app.utils.tuneParams import update_ranges_by_quality_control
 
 rerun_bp = Blueprint('rerun', __name__)
 
