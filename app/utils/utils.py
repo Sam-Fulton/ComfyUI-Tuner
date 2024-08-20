@@ -1,4 +1,5 @@
 import os
+from flask import request, jsonify
 from bson import ObjectId
 
 def get_output_paths(run_workflow):
@@ -37,3 +38,12 @@ def convert_objectid_to_str(data):
         return str(data)
     else:
         return data
+    
+def extract_and_validate_json():
+    try:
+        request_payload = request.get_json()
+        if request_payload is None:
+            return None, jsonify({"error": "No valid JSON data was supplied"}), 400
+        return request_payload, None, None
+    except Exception:
+        return None, jsonify({"error": "Failed to parse JSON data"}), 400

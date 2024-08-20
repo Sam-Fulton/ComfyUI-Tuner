@@ -9,9 +9,18 @@ def upload_workflow():
         return data_error_message(), 400
     
     try:
-        workflow_data = request.get_json()
-        print(workflow_data)
-        insert_base_workflow(db=get_db(), workflow_data=workflow_data)
+        try:
+            workflow_data = request.get_json()
+            if workflow_data is None:
+                return data_error_message(), 400
+        except Exception:
+            return jsonify({"error": "No valid json data was supplied"}), 400
+        
+        try:
+            insert_base_workflow(db=get_db(), workflow_data=workflow_data)
+        except Exception as db_error:
+            return jsonify({"error": "Failed to insert workflow into database: " + str(db_error)}), 500
+
         return jsonify({"message": "Workflow successfully added"}), 200
     
     except Exception as e:
