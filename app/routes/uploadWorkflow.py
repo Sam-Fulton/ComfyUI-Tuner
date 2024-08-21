@@ -1,23 +1,18 @@
 from flask import Blueprint, request, jsonify
 from app.utils.mongo import get_db, insert_base_workflow
+from app.utils.utils import extract_and_validate_json
 
 upload_workflow_bp = Blueprint('uploadWorkflow', __name__)
 
 @upload_workflow_bp.route('/api/uploadWorkflow', methods=['POST'])
-def upload_workflow():
-    if not request.is_json:
-        return data_error_message(), 400
-    
+def upload_workflow():  
     try:
-        try:
-            workflow_data = request.get_json()
-            if workflow_data is None:
-                return data_error_message(), 400
-        except Exception:
-            return jsonify({"error": "No valid json data was supplied"}), 400
+        request_payload, error_response, status_code = extract_and_validate_json(request)
+        if error_response:
+            return error_response, status_code
         
         try:
-            insert_base_workflow(db=get_db(), workflow_data=workflow_data)
+            insert_base_workflow(db=get_db(), workflow_data=request_payload)
         except Exception as db_error:
             return jsonify({"error": "Failed to insert workflow into database: " + str(db_error)}), 500
 

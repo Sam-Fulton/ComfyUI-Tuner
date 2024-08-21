@@ -58,7 +58,7 @@ def test_rerun_invalid_json(mock_update_ranges, mock_find_base_workflow, mock_ge
     
     assert response.status_code == 400
     json_data = response.get_json()
-    assert json_data == {"error": "No valid run data was supplied, please upload a workflow/prompt"}
+    assert json_data ==  {'error': 'Failed to parse JSON data'}
 
 @patch('app.routes.rerun.get_db')
 @patch('app.routes.rerun.find_base_workflow')
@@ -104,4 +104,4 @@ def test_rerun_no_json_supplied(mock_update_ranges, mock_find_base_workflow, moc
     
     assert response.status_code == 400
     json_data = response.get_json()
-    assert json_data == {"error": "No valid run data was supplied, please upload a workflow/prompt"}
+    assert json_data ==  {'error': 'Failed to parse JSON data'}

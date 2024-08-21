@@ -1,22 +1,20 @@
-from flask import Blueprint, send_from_directory, request, jsonify
 import os
+from flask import Blueprint, send_from_directory, request, jsonify
+from app.utils.utils import extract_and_validate_json
 
 static_files_bp = Blueprint('static_files', __name__)
 
 @static_files_bp.route('/api/outputs', methods=['POST'])
 def serve_output_file():
     try:
-        try:
-            data = request.get_json()
-            if data is None:
-                return jsonify({"error": "No valid json data was supplied"}), 400
-        except Exception:
-            return jsonify({"error": "No valid json data was supplied"}), 400
+        request_payload, error_response, status_code = extract_and_validate_json(request)
+        if error_response:
+            return error_response, status_code
 
-        if 'path' not in data:
+        if 'path' not in request_payload:
             return jsonify({"error": "Path not provided"}), 400
         
-        filepath = data['path']
+        filepath = request_payload['path']
         directory = os.path.dirname(filepath)
         filename = os.path.basename(filepath)
         

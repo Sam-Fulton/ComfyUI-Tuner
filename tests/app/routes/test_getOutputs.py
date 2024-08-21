@@ -40,7 +40,7 @@ def test_get_outputs_workflow_not_found(mock_get_db, mock_find_run_workflow, cli
     response = client.post('/api/getOutputs', json={"run_workflow_id": "mocked_id"})
     
     assert response.status_code == 400
-    assert response.json == {"error": "There was no workflow found with id : mocked_id"}
+    assert response.json == {'error': 'There was no workflow found with id: mocked_id'}
 
 @patch('app.routes.getOutputs.find_run_workflow')
 @patch('app.routes.getOutputs.find_outputs_by_run_workflow_id')
@@ -55,7 +55,7 @@ def test_get_outputs_no_outputs_found(mock_get_db, mock_find_outputs_by_run_work
     response = client.post('/api/getOutputs', json={"run_workflow_id": "mocked_id"})
     
     assert response.status_code == 400
-    assert response.json == {"error": "There was no outputs found for workflow: mocked_id"}
+    assert response.json == {'error': 'There were no outputs found for workflow: mocked_id'}
 
 @patch('app.routes.getOutputs.get_db')
 def test_get_outputs_exception(mock_get_db, client):
@@ -65,3 +65,18 @@ def test_get_outputs_exception(mock_get_db, client):
     
     assert response.status_code == 500
     assert response.json == {"error": "Database connection failed"}
+
+@patch('app.routes.getOutputs.find_run_workflow')
+@patch('app.routes.getOutputs.find_outputs_by_run_workflow_id')
+@patch('app.routes.getOutputs.get_db')
+def test_get_outputs_missing_run_workflow_id(mock_get_db, mock_find_outputs_by_run_workflow_id, mock_find_run_workflow, client):
+    mock_db = MagicMock()
+    mock_get_db.return_value = mock_db
+
+    mock_find_run_workflow.return_value = {"key": "value"}
+    mock_find_outputs_by_run_workflow_id.return_value = None 
+
+    response = client.post('/api/getOutputs', json={}) 
+    
+    assert response.status_code == 400
+    assert response.json == {"error": "No run_workflow_id was supplied"}

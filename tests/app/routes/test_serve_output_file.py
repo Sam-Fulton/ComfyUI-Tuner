@@ -47,7 +47,7 @@ def test_serve_output_file_no_json(client):
     assert response.status_code == 400
     json_data = response.get_json()
     assert "error" in json_data
-    assert json_data["error"] == "No valid json data was supplied"
+    assert json_data["error"] == "Failed to parse JSON data"
 
 @patch('app.routes.serve_output_file.os.path.exists')
 @patch('app.routes.serve_output_file.send_from_directory')

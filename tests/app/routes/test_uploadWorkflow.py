@@ -32,7 +32,7 @@ def test_upload_workflow_invalid_json(mock_insert_base_workflow, mock_get_db, cl
     
     assert response.status_code == 400
     json_data = response.get_json()
-    assert json_data == {"error": "No valid json data was supplied"}
+    assert json_data == {'error': 'Failed to parse JSON data'}
 
 @patch('app.routes.uploadWorkflow.get_db')
 @patch('app.routes.uploadWorkflow.insert_base_workflow')
@@ -41,7 +41,7 @@ def test_upload_workflow_json_is_none(mock_insert_base_workflow, mock_get_db, cl
     
     assert response.status_code == 400
     json_data = response.get_json()
-    assert json_data == {"error": "Invalid Content uploaded, please upload a valid ComfyUI api workflow"}
+    assert json_data == {'error': 'Failed to parse JSON data'}
 
 @patch('app.routes.uploadWorkflow.get_db')
 @patch('app.routes.uploadWorkflow.insert_base_workflow')

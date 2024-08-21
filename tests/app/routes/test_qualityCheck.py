@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from flask import Flask
+from flask import Flask, jsonify
 from app.routes.qualityCheck import quality_check_bp
 
 @pytest.fixture
@@ -9,7 +9,8 @@ def client():
     app.register_blueprint(quality_check_bp)
     app.config['TESTING'] = True
     with app.test_client() as client:
-        yield client
+        with app.app_context():  
+            yield client
 
 @patch('app.routes.qualityCheck.insert_quality_review')
 @patch('app.routes.qualityCheck.update_quality_assessment')
@@ -78,3 +79,21 @@ def test_quality_check_exception(mock_get_db, client):
 
     assert response.status_code == 500
     assert response.json == {"error": "Database connection failed"}
+
+@patch('app.routes.qualityCheck.extract_and_validate_json')
+def test_quality_check_invalid_json(mock_extract_and_validate_json, client):
+    mock_extract_and_validate_json.return_value = (None, jsonify({"error": "No valid JSON data was supplied"}), 400)
+    
+    response = client.post('/api/qualityCheck', data="Invalid JSON", content_type='application/json')
+    
+    assert response.status_code == 400
+    assert response.json == {"error": "No valid JSON data was supplied"}
+
+@patch('app.routes.qualityCheck.extract_and_validate_json')
+def test_quality_check_missing_keys(mock_extract_and_validate_json, client):
+    mock_extract_and_validate_json.return_value = ({"key": "value"}, None, None)
+    
+    response = client.post('/api/qualityCheck', json={"key": "value"})
+    
+    assert response.status_code == 400
+    assert response.json == {"error": "run_workflow_id, path or quality_assessment not in request"}

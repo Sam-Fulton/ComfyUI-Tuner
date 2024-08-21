@@ -12,9 +12,9 @@ const App = () => {
             <div>
                 <nav>
                     <Link to="/">Upload Workflow</Link>
-                    <Link to="/categorisation" style={{ marginLeft: '10px' }}>Categorisation Page</Link>
-                    <Link to="/run" style={{ marginLeft: '10px' }}>Run Page</Link>
-                    <Link to="/analysis" style={{ marginLeft: '10px' }}>Analysis Page</Link>
+                    <Link to="/categorisation" style={{ marginLeft: '10px' }}>Categorisation</Link>
+                    <Link to="/run" style={{ marginLeft: '10px' }}>Run</Link>
+                    <Link to="/analysis" style={{ marginLeft: '10px' }}>Analysis/Rerun</Link>
                 </nav>
                 <Routes>
                     <Route path="/" element={<UploadWorkflowPage />} />

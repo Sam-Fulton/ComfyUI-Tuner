@@ -44,7 +44,7 @@ def test_get_quality_assessment_by_run_workflow_invalid_json(mock_find_quality_a
     response = client.post('/api/getQualityAssessmentByRunWorkflow', data="Invalid JSON", content_type='application/json')
     assert response.status_code == 400
     json_data = response.get_json()
-    assert json_data == {"error": "No valid json data was supplied"}
+    assert json_data == {'error': 'Failed to parse JSON data'}
 
 @patch('app.routes.getQualityAssessmentByRunWorkflow.get_db')
 @patch('app.routes.getQualityAssessmentByRunWorkflow.find_quality_assessments_by_run_workflow_ids')

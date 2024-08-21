@@ -90,7 +90,7 @@ def test_convert_objectid_to_str():
 
 def test_extract_and_validate_json_success(app):
     with app.test_request_context(json={"key": "value"}):
-        result, error_response, status_code = extract_and_validate_json()
+        result, error_response, status_code = extract_and_validate_json(request)
         assert result == {"key": "value"}
         assert error_response is None
         assert status_code is None
@@ -98,7 +98,7 @@ def test_extract_and_validate_json_success(app):
 def test_extract_and_validate_json_invalid_json(app):
     with app.test_request_context(data="{invalid json}", content_type="application/json"):
         with patch.object(request, 'get_json', side_effect=ValueError("Invalid JSON")):
-            result, error_response, status_code = extract_and_validate_json()
+            result, error_response, status_code = extract_and_validate_json(request)
             assert result is None
             assert error_response.json == {"error": "Failed to parse JSON data"}
             assert status_code == 400
@@ -106,7 +106,7 @@ def test_extract_and_validate_json_invalid_json(app):
 def test_extract_and_validate_json_no_payload(app):
     with app.test_request_context():
         with patch.object(request, 'get_json', return_value=None):
-            result, error_response, status_code = extract_and_validate_json()
+            result, error_response, status_code = extract_and_validate_json(request)
             assert result is None
             assert error_response.json == {"error": "No valid JSON data was supplied"}
             assert status_code == 400

@@ -1,5 +1,5 @@
 import os
-from flask import request, jsonify
+from flask import jsonify
 from bson import ObjectId
 
 def get_output_paths(run_workflow):
@@ -39,7 +39,7 @@ def convert_objectid_to_str(data):
     else:
         return data
     
-def extract_and_validate_json():
+def extract_and_validate_json(request):
     try:
         request_payload = request.get_json()
         if request_payload is None:
