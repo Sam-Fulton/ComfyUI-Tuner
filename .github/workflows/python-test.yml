@@ -37,4 +37,8 @@ jobs:
     - name: Test with pytest
       run: |
         export PYTHONPATH=$(pwd)
-        pytest
+        pytest --cov=app --cov-report=xml --cov-report=html
+
+    - name: Display coverage report
+      run: |
+        cat coverage.xml
