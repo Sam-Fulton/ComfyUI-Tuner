@@ -1,6 +1,7 @@
 import pytest
 from flask import Flask, request, json
 from unittest.mock import patch, MagicMock
+import os
 from bson import ObjectId
 from app.utils.utils import get_output_paths, new_outputs, convert_objectid_to_str, extract_and_validate_json
 
@@ -52,8 +53,8 @@ def client(app):
 def test_get_output_paths(mock_os_path_exists, mock_os_walk):
     output_files = get_output_paths(sample_workflow)
     assert len(output_files) == 2
-    assert "/app/ComfyUI/output/image_1.png" in output_files
-    assert "/app/ComfyUI/output/video_1.mp4" in output_files
+    assert os.path.normpath("/app/ComfyUI/output/image_1.png") in map(os.path.normpath, output_files)
+    assert os.path.normpath("/app/ComfyUI/output/video_1.mp4") in map(os.path.normpath, output_files)
 
 def test_get_output_paths_no_save_class(mock_os_path_exists, mock_os_walk):
     no_save_workflow = {

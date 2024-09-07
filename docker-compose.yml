@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build: .
@@ -9,14 +7,14 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=5000
-      - COMFYUI_ADDRESS=192.168.1.1:8188
+      - COMFYUI_ADDRESS=192.168.1.99:8188
       - MONGO_URI=mongodb://mongodb:27017/
       - FLASK_ENV=development
     depends_on:
       - mongodb
     volumes:
       - .:/app
-      - /home/sam/Documents/qlab/ComfyUI:/app/ComfyUI
+      - ../ComfyUI:/app/ComfyUI
     dns:
       - 8.8.8.8
       - 8.8.4.4

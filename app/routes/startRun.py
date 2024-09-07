@@ -56,7 +56,7 @@ def process_run_workflow(run_workflow, base_workflow, db, request_payload, group
 @start_run_bp.route('/api/startRun', methods=['POST'])
 def start_run():
     try:
-        request_payload, error_response, status_code = extract_and_validate_json()
+        request_payload, error_response, status_code = extract_and_validate_json(request)
         if error_response:
             return error_response, status_code
         
