@@ -23,6 +23,7 @@ jobs:
     
     - name: Install dependencies
       run: |
+        cd backend
         export PYTHONPATH=$(pwd)
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-cov
@@ -30,20 +31,24 @@ jobs:
     
     - name: Lint with flake8
       run: |
+        cd backend
         export PYTHONPATH=$(pwd)
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     
     - name: Test with pytest
       run: |
+        cd backend
         export PYTHONPATH=$(pwd)
         pytest --cov=app --cov-report=term --cov-report=xml --cov-report=html
     
     - name: Display coverage report summary
       run: |
+        cd backend
         coverage report
 
     - name: Display coverage report in detail
       run: |
+        cd backend
         coverage html
         cat htmlcov/index.html
