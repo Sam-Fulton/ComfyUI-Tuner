@@ -1,6 +1,8 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: comfyUI_tuner
     ports:
       - "5000:5000"
@@ -13,8 +15,8 @@ services:
     depends_on:
       - mongodb
     volumes:
-      - .:/app
-      - ../ComfyUI:/app/ComfyUI
+      - ./backend/:/backend
+      - ../ComfyUI:/backend/ComfyUI
     dns:
       - 8.8.8.8
       - 8.8.4.4
@@ -30,6 +32,22 @@ services:
       - mongo_data:/data/db
       - ./mongod.conf:/etc/mongod.conf
     command: ["mongod", "--config", "/etc/mongod.conf"]
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: comfyUI_tuner_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    stdin_open: true
+    tty: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - web
+      - mongodb
 
 volumes:
   mongo_data:
