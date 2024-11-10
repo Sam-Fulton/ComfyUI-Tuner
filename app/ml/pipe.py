@@ -2,7 +2,7 @@ import os
 from feature_extraction import extract_features, load_image
 from similarity import calculate_similarity
 from trueskill import Rating
-from app.utils.image import Image
+from backend.app.utils.image import Image
 from comparison import Comparison
 
 class Pipe:

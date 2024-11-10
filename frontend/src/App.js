@@ -5,6 +5,7 @@ import UploadWorkflowPage from './pages/UploadWorkflowPage';
 import CategorisationPage from './pages/CategorisationPage';
 import RunPage from './pages/RunPage';
 import AnalysisPage from './pages/AnalysisPage';
+import RoundComparisonPage from './pages/RoundComparisonPage';
 
 const App = () => {
     return (
@@ -13,12 +14,14 @@ const App = () => {
                 <nav>
                     <Link to="/">Upload Workflow</Link>
                     <Link to="/categorisation" style={{ marginLeft: '10px' }}>Categorisation</Link>
+                    <Link to="/roundComparison" style={{ marginLeft: '10px' }}>Round Comparison</Link>
                     <Link to="/run" style={{ marginLeft: '10px' }}>Run</Link>
                     <Link to="/analysis" style={{ marginLeft: '10px' }}>Analysis/Rerun</Link>
                 </nav>
                 <Routes>
                     <Route path="/" element={<UploadWorkflowPage />} />
                     <Route path="/categorisation" element={<CategorisationPage />} />
+                    <Route path="/roundComparison" element={<RoundComparisonPage />} />
                     <Route path="/run" element={<RunPage />} />
                     <Route path="/analysis" element={<AnalysisPage />} />
                 </Routes>
