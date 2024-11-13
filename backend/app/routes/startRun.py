@@ -10,6 +10,7 @@ start_run_bp = Blueprint('startRun', __name__)
 
 def handle_base_workflow(request_payload, db):
     base_workflow = request_payload.get('base_workflow')
+    
     if not base_workflow:
         return None, jsonify({"error": "Base workflow is missing"}), 400
 
@@ -45,8 +46,9 @@ def process_run_workflow(run_workflow, base_workflow, db, request_payload, group
     workflow_output_paths = new_outputs(before_outputs, after_outputs)
 
     if not workflow_output_paths:
-        return None, jsonify({"message": "The workflow produced no output. Please check your workflow and try again or check with ComfyUI.", "results": []}), 200
+        return None, jsonify({"message": "The workflow produced no output. Please check your workflow and try again or check with ComfyUI.", "results": []}), 500
 
+    print(request_payload['base_workflow_id'], flush=True)
     run_workflow_id = insert_run_workflow(db=db, workflow_data=run_workflow, base_workflow_id=request_payload['base_workflow_id'], group_timestamp=group_timestamp)
     outputs = Outputs(run_workflow_id=str(run_workflow_id), paths=workflow_output_paths)
     output_id = insert_outputs(db=db, outputs=outputs)

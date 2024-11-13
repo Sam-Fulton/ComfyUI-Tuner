@@ -3,7 +3,7 @@ from flask import jsonify
 from bson import ObjectId
 
 def get_output_paths(run_workflow):
-    comfyui_base_dir = "/app/ComfyUI/output"
+    comfyui_base_dir = "/backend/ComfyUI/output"
     output_files = []
 
     for k in run_workflow.keys():
@@ -12,12 +12,15 @@ def get_output_paths(run_workflow):
         class_type = node.get('class_type', '').lower()
         
         if 'save' in class_type:
+            print('save', flush=True)
             for input_key, input_value in inputs.items():
-                if 'filename' in input_key and isinstance(input_value, str):
-                    output_path = os.path.join(comfyui_base_dir, input_value)
-                    output_dir = os.path.dirname(output_path)
-                    
+                if 'filename_prefix' in input_key and isinstance(input_value, str):
+                    #output_path = os.path.join(comfyui_base_dir, input_value)
+                    #output_dir = os.path.dirname(output_path)
+                    output_dir = comfyui_base_dir
+                    print(output_dir, flush=True)
                     if output_dir and os.path.exists(output_dir):
+                        print(output_dir, flush=True)
                         for root, _, files in os.walk(output_dir):
                             print(files, flush=True)
                             for file in files:
