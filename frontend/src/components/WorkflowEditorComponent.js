@@ -1,68 +1,74 @@
 import React, { useState, useEffect } from 'react';
+import ReactJson from 'react-json-view';
 import './styles/WorkflowEditorComponent.css';
 
 const WorkflowEditorComponent = ({ workflow, onSave }) => {
-    const [jsonString, setJsonString] = useState('');
+  const [jsonData, setJsonData] = useState({});
 
-    useEffect(() => {
-        if (workflow) {
-            setJsonString(JSON.stringify(workflow.value, null, 2));
-        } else {
-            setJsonString('');
-        }
-    }, [workflow]);
+  useEffect(() => {
+    if (workflow) {
+      setJsonData(workflow.value);
+    } else {
+      setJsonData({});
+    }
+  }, [workflow]);
 
-    const handleJsonChange = (event) => {
-        setJsonString(event.target.value);
+  const handleEdit = (edit) => {
+    setJsonData(edit.updated_src);
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        setJsonData(json);
+      } catch (error) {
+        console.error('Invalid JSON file');
+        alert('Invalid JSON file');
+      }
     };
 
-    const handleSave = () => {
-        try {
-            const json = JSON.parse(jsonString);
-            onSave({ ...workflow, value: json });
-            alert('JSON saved successfully');
-        } catch (error) {
-            console.error('Invalid JSON format');
-            alert('Invalid JSON format');
-        }
-    };
+    if (file) {
+      reader.readAsText(file);
+    }
+  };
 
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
-        const reader = new FileReader();
+  const handleSave = () => {
+    try {
+      onSave({ ...workflow, value: jsonData });
+      alert('JSON updated locally; save to database via your existing mechanism if needed.');
+    } catch (error) {
+      console.error('Error saving JSON');
+      alert('Error saving JSON');
+    }
+  };
 
-        reader.onload = (e) => {
-            try {
-                const json = JSON.parse(e.target.result);
-                setJsonString(JSON.stringify(json, null, 2));
-            } catch (error) {
-                console.error('Invalid JSON file');
-                alert('Invalid JSON file');
-            }
-        };
-
-        if (file) {
-            reader.readAsText(file);
-        }
-    };
-
-    return (
-        <div>
-            <h1>{workflow ? 'Edit Workflow' : 'Create Workflow'}</h1>
-            <input type="file" accept=".json" onChange={handleFileUpload} />
-            <textarea
-                value={jsonString}
-                onChange={handleJsonChange}
-                rows="20"
-                cols="80"
-                style={{ marginTop: '20px', fontFamily: 'monospace' }}
-            />
-            <br />
-            <button onClick={handleSave} style={{ marginTop: '10px' }}>
-                Save
-            </button>
-        </div>
-    );
+  return (
+    <div className="editor-container">
+      <h2>{workflow ? 'Edit Workflow' : 'Create Workflow'}</h2>
+      <div className="editor-toolbar">
+        <input type="file" accept=".json" onChange={handleFileUpload} />
+        <button onClick={handleSave}>Save</button>
+      </div>
+      <div className="json-editor">
+        <ReactJson 
+            key={JSON.stringify(jsonData)}
+            src={jsonData}
+            onEdit={handleEdit}
+            onAdd={handleEdit}
+            onDelete={handleEdit}
+            name={null}
+            displayDataTypes={false}
+            displayObjectSize={false}
+            indentWidth={2}
+            collapsed={false}
+        />
+      </div>
+    </div>
+  );
 };
 
 export default WorkflowEditorComponent;

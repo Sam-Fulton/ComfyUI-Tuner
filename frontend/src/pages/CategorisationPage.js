@@ -47,11 +47,10 @@ const CategorisationPage = () => {
         const timestamp = event.target.value;
         setSelectedGroupTimestamp(timestamp);
         setOutputs([]);
-        setSelectedRunWorkflow(null); // Ensure no default selection
+        setSelectedRunWorkflow(null);
 
         const matchingWorkflows = runWorkflows.filter(workflow => Number(workflow.group_timestamp) === Number(timestamp));
         if (matchingWorkflows.length === 1) {
-            // Automatically select the only workflow if there's only one
             setSelectedRunWorkflow(matchingWorkflows[0]._id);
             fetchOutputs(matchingWorkflows[0]._id);
         }

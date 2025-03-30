@@ -134,9 +134,37 @@ def determine_input_type_and_update(inputs, input_key, converted_values):
     elif all(isinstance(v, str) for v in converted_values):
         inputs[input_key] = {"type": "discrete", "values": list(set(converted_values))}
 
+def extend_ranges_from_base(base_workflow):
+    if 'value' in base_workflow:
+        base_workflow_value = base_workflow['value']
+    else:
+        base_workflow_value = base_workflow
+
+    for node_key, node_data in base_workflow_value.items():
+        if 'inputs' in node_data:
+            inputs = node_data['inputs']
+            for input_key, input_val in inputs.items():
+                if isinstance(input_val, dict) and input_val.get('type') == 'range':
+                    values = input_val.get('values', [])
+                    if isinstance(values, list) and len(values) == 2:
+                        try:
+                            min_val = float(values[0])
+                            max_val = float(values[1])
+                            range_diff = max_val - min_val
+                            extended_min = min_val - range_diff
+                            extended_max = max_val + range_diff
+                            inputs[input_key] = {"type": "range", "values": [extended_min, extended_max]}
+                        except ValueError:
+                            continue
+    return base_workflow
+
 def update_ranges_by_quality_control(run_workflow_ids, base_workflow, threshold, db):
     good_workflows = filter_good_workflows(run_workflow_ids, threshold, db)
-    combined_assessments = combine_differing_inputs(good_workflows)
-    updated_base_workflow = convert_and_adjust_values(base_workflow, combined_assessments)
-
+    
+    if good_workflows:
+        combined_assessments = combine_differing_inputs(good_workflows)
+        updated_base_workflow = convert_and_adjust_values(base_workflow, combined_assessments)
+    else:
+        updated_base_workflow = extend_ranges_from_base(base_workflow)
+    
     return updated_base_workflow

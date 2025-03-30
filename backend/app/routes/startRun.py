@@ -37,7 +37,7 @@ def prepare_workflows(base_workflow, num_runs):
 
 def process_run_workflow(run_workflow, base_workflow, db, request_payload, group_timestamp):
     before_outputs = get_output_paths(base_workflow)
-    print("output paths got", flush=True)
+    #print("output paths got", flush=True)
 
     make_comfyUI_request(run_workflow, current_app.config['COMFYUI_ADDRESS'])
     print("COMFYUI request finished", flush=True)

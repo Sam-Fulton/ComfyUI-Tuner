@@ -1,37 +1,40 @@
-textarea {
-    width: 100%;
-    padding: 10px;
-    font-family: "Source Code Pro", "Courier New", Courier, monospace;
+.editor-container {
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .editor-toolbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .editor-toolbar input[type="file"] {
     font-size: 14px;
-    color: #333;
-    background-color: #f7f7f7;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-    resize: vertical;
-    line-height: 1.5;
-}
-
-input[type="file"] {
-    margin-bottom: 15px;
-}
-
-button {
+  }
+  
+  .editor-toolbar button {
     background-color: #007bff;
     border: none;
     color: white;
-    padding: 10px 20px;
-    font-size: 14px;
-    cursor: pointer;
+    padding: 8px 16px;
     border-radius: 4px;
-    transition: background-color 0.3s ease;
-    margin-top: 10px;
-}
-
-button:hover {
+    cursor: pointer;
+  }
+  
+  .editor-toolbar button:hover {
     background-color: #0056b3;
-}
-
-div {
+  }
+  
+  .json-editor {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     padding: 10px;
-}
+    font-family: 'Courier New', Courier, monospace;
+  }
+  

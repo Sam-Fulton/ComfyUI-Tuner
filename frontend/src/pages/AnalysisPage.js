@@ -184,7 +184,10 @@ const AnalysisPage = () => {
             return;
         }
     
-        const runWorkflowIds = runWorkflows.map(workflow => workflow._id);
+        const filteredRunWorkflows = runWorkflows.filter(workflow =>
+            Number(workflow.group_timestamp) === Number(selectedGroupTimestamp)
+        );
+        const runWorkflowIds = filteredRunWorkflows.map(workflow => workflow._id);
     
         const payload = {
             base_workflow_id: selectedBaseWorkflow._id,
@@ -228,11 +231,6 @@ const AnalysisPage = () => {
             <QualityAssessmentChart 
                 qualityAssessments={qualityAssessments}
                 getGoodBadCounts={getGoodBadCounts}
-            />
-
-            <h2>Good vs Bad per Parameter</h2>
-            <ParameterChart 
-                getParameterCounts={getParameterCounts}
             />
 
             {selectedBaseWorkflow && (
