@@ -50,3 +50,9 @@ def extract_and_validate_json(request):
         return request_payload, None, None
     except Exception:
         return None, jsonify({"error": "Failed to parse JSON data"}), 400
+    
+def to_num(s):
+    try:
+        return float(s) if '.' in str(s) else int(s)
+    except ValueError:
+        return None

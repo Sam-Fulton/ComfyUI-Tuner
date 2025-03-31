@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify, current_app
 from app.utils.comfyUI import make_comfyUI_request
 from app.utils.mongo import insert_outputs, get_db, insert_run_workflow, update_base_workflow, find_base_workflow
 from app.utils.outputs import Outputs
-from app.utils.tuneParams import label_workflow_for_random_sampling, prepare_run_workflow
+from app.utils.label_prepare_workflow import label_workflow_for_random_sampling, prepare_run_workflow
 from app.utils.utils import get_output_paths, new_outputs, extract_and_validate_json
 
 start_run_bp = Blueprint('startRun', __name__)
@@ -79,6 +79,7 @@ def start_run():
         group_timestamp = int(datetime.now().timestamp())
         results = []
 
+        #print(run_workflows, flush=True)
         for run_workflow in run_workflows:
             result, error_response, status_code = process_run_workflow(run_workflow, base_workflow, db, request_payload, group_timestamp)
             if error_response:

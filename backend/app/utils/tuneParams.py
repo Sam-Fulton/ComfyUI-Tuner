@@ -1,56 +1,12 @@
-import random
-import copy
 from app.utils.mongo import find_quality_assessments_by_run_workflow_id, find_run_workflow
 from app.utils.qualityAssessment import QualityAssessment
+from app.utils.label_prepare_workflow import extract_base_workflow
+from app.utils.range import update_range_from_good_bad, update_range_fallback, extend_ranges_from_base
+from app.utils.utils import to_num
 
-def label_workflow_for_random_sampling(base_workflow):
-    for k in base_workflow.keys():
-        inputs = base_workflow[k]['inputs']
-        for input_key, input_value in inputs.items():
-            if (isinstance(input_value, dict) 
-                and 'type' in input_value 
-                and 'values' in input_value 
-                and len(input_value) == 2 
-                and input_value['type'] in ['discrete', 'range']):
-                continue
-            
-            if isinstance(input_value, list):
-                if len(set(map(type, input_value))) == 1:
-                    if all(isinstance(v, str) for v in input_value):
-                        base_workflow[k]['inputs'][input_key] = {"type": "discrete", "values": input_value}
-                    elif all(isinstance(v, int) for v in input_value):
-                        if len(input_value) > 2:
-                            base_workflow[k]['inputs'][input_key] = {"type": "discrete", "values": input_value}
-                        else:
-                            base_workflow[k]['inputs'][input_key] = {"type": "range", "values": input_value}
-                    elif all(isinstance(v, float) for v in input_value):
-                        if len(input_value) > 2:
-                            base_workflow[k]['inputs'][input_key] = {"type": "discrete", "values": input_value}
-                        else:
-                            base_workflow[k]['inputs'][input_key] = {"type": "range", "values": input_value}
-        
-    return base_workflow
-
-
-def prepare_run_workflow(base_workflow): 
-    run_workflow = copy.deepcopy(base_workflow)
-    for k in run_workflow.keys():
-        inputs = run_workflow[k]['inputs']
-        for input_key, input_value in inputs.items():
-            if isinstance(input_value, dict) and "type" in input_value and "values" in input_value:
-                if input_value["type"] == "discrete":
-                    run_workflow[k]['inputs'][input_key] = random.choice(input_value["values"])
-                elif input_value["type"] == "range":
-                    if all(isinstance(v, int) for v in input_value["values"]):
-                        run_workflow[k]['inputs'][input_key] = random.randint(input_value["values"][0], input_value["values"][1])
-                    elif all(isinstance(v, float) for v in input_value["values"]):
-                        run_workflow[k]['inputs'][input_key] = random.uniform(input_value["values"][0], input_value["values"][1])
-    
-    return run_workflow
-
-def filter_good_workflows(run_workflow_ids, threshold, db):
+def sort_workflows(run_workflow_ids, threshold, db):
     good_workflows = []
-
+    bad_workflows = []
     for run_workflow_id in run_workflow_ids:
         run_workflow = find_run_workflow(db, run_workflow_id)
         quality_assessments = find_quality_assessments_by_run_workflow_id(db, run_workflow_id)
@@ -61,110 +17,94 @@ def filter_good_workflows(run_workflow_ids, threshold, db):
             
             if total_assessments > 0 and good_count / total_assessments >= threshold:
                 good_workflows.append(run_workflow)
-    
-    return good_workflows
+            else:
+                bad_workflows.append(run_workflow)
 
-def combine_differing_inputs(good_workflows):
+    return good_workflows, bad_workflows
+
+def extract_tuned_input_keys(base_workflow):
+    tuned_keys = {}
+    base_workflow_value = extract_base_workflow(base_workflow)
+    for node_key, node_val in base_workflow_value.items():
+        inputs = node_val.get('inputs', {})
+        for input_key, input_val in inputs.items():
+            if isinstance(input_val, dict) and 'type' in input_val and 'values' in input_val:
+                tuned_keys.setdefault(node_key, set()).add(input_key)
+    return tuned_keys
+
+def collect_run_input_values(run_workflows, tuned_keys):
     combined_assessments = {}
-
-    for workflow in good_workflows:
-        for node_key, node_data in workflow.items():
-            if 'inputs' in node_data:
-                inputs = node_data['inputs']
-                for input_key, input_value in inputs.items():
-                    if node_key not in combined_assessments:
-                        combined_assessments[node_key] = {}
-                    if input_key not in combined_assessments[node_key]:
-                        combined_assessments[node_key][input_key] = set()
-                    combined_assessments[node_key][input_key].add(str(input_value))
-
-    for node_key, inputs in list(combined_assessments.items()):
-        for input_key, values in list(inputs.items()):
-            if len(values) <= 1:
-                del combined_assessments[node_key][input_key]
-        if not combined_assessments[node_key]:
-            del combined_assessments[node_key]
-    
+    for node_key, input_keys in tuned_keys.items():
+        for input_key in input_keys:
+            combined_assessments.setdefault(node_key, {})[input_key] = set()
+            for workflow in run_workflows:
+                if node_key in workflow and 'inputs' in workflow[node_key]:
+                    if input_key in workflow[node_key]['inputs']:
+                        combined_assessments[node_key][input_key].add(
+                            str(workflow[node_key]['inputs'][input_key])
+                        )
     return combined_assessments
 
-def convert_and_adjust_values(base_workflow, combined_assessments):
-    if 'value' in base_workflow.keys():
-        base_workflow_value = base_workflow['value']
-    else:
-        base_workflow_value = base_workflow
+def combine_differing_inputs(run_workflows, base_workflow):
+    tuned_keys = extract_tuned_input_keys(base_workflow)
+    combined_assessments = collect_run_input_values(run_workflows, tuned_keys)
+    return combined_assessments
 
-    for node_key in base_workflow_value.keys():
-        inputs = base_workflow_value[node_key]['inputs']
-        for input_key in inputs.keys():
-            if input_key in combined_assessments.get(node_key, {}):
-                input_values = combined_assessments[node_key][input_key]
-                
-                converted_values = []
-                for v in input_values:
-                    try:
-                        if '.' in v:
-                            converted_values.append(float(v))
-                        else:
-                            converted_values.append(int(v))
-                    except ValueError:
-                        converted_values.append(v)
 
-                if len(converted_values) == 0 or len(set(converted_values)) < 2:
-                    extend_numeric_range(inputs, input_key, input_values)
-                else:
-                    determine_input_type_and_update(inputs, input_key, converted_values)
-    
-    return base_workflow
-
-def extend_numeric_range(inputs, input_key, input_values):
-    numeric_values = [float(v) for v in input_values if isinstance(v, (int, float)) or v.replace('.', '', 1).isdigit()]
-    
-    if numeric_values:
-        min_val, max_val = min(numeric_values), max(numeric_values)
-        range_diff = max_val - min_val
-        extended_min = min_val - range_diff
-        extended_max = max_val + range_diff
-        inputs[input_key] = {"type": "range", "values": [extended_min, extended_max]}
-
-def determine_input_type_and_update(inputs, input_key, converted_values):
-    if all(isinstance(v, int) for v in converted_values):
-        inputs[input_key] = {"type": "range", "values": [min(converted_values), max(converted_values)]}
-    elif all(isinstance(v, float) for v in converted_values):
-        inputs[input_key] = {"type": "range", "values": [min(converted_values), max(converted_values)]}
-    elif all(isinstance(v, str) for v in converted_values):
-        inputs[input_key] = {"type": "discrete", "values": list(set(converted_values))}
-
-def extend_ranges_from_base(base_workflow):
-    if 'value' in base_workflow:
-        base_workflow_value = base_workflow['value']
-    else:
-        base_workflow_value = base_workflow
+def convert_and_adjust_values(base_workflow, good_tune_params, bad_tune_params):
+    base_workflow_value = extract_base_workflow(base_workflow)
 
     for node_key, node_data in base_workflow_value.items():
-        if 'inputs' in node_data:
-            inputs = node_data['inputs']
-            for input_key, input_val in inputs.items():
-                if isinstance(input_val, dict) and input_val.get('type') == 'range':
-                    values = input_val.get('values', [])
-                    if isinstance(values, list) and len(values) == 2:
-                        try:
-                            min_val = float(values[0])
-                            max_val = float(values[1])
-                            range_diff = max_val - min_val
-                            extended_min = min_val - range_diff
-                            extended_max = max_val + range_diff
-                            inputs[input_key] = {"type": "range", "values": [extended_min, extended_max]}
-                        except ValueError:
-                            continue
-    return base_workflow
+        inputs = node_data.get('inputs', {})
+        for input_key in list(inputs.keys()):
+            if ((node_key in good_tune_params and input_key in good_tune_params[node_key]) or 
+                (node_key in bad_tune_params and input_key in bad_tune_params[node_key])):
+                
+                good_set = good_tune_params.get(node_key, {}).get(input_key, set())
+                bad_set = bad_tune_params.get(node_key, {}).get(input_key, set())
+
+                print(f"Good set for {node_key}:{input_key} -> {good_set}")
+                print(f"Bad set for {node_key}:{input_key} -> {bad_set}")
+
+                good_nums = [to_num(v) for v in good_set if to_num(v) is not None]
+                bad_nums  = [to_num(v) for v in bad_set if to_num(v) is not None]
+
+                current_range = inputs[input_key].get("values", None)
+                if not (current_range and len(current_range) == 2):
+                    continue
+                try:
+                    base_lower = float(current_range[0])
+                    base_upper = float(current_range[1])
+                except ValueError:
+                    continue
+
+                if good_nums and bad_nums and inputs[input_key]['type'] == 'range':
+                    msg = update_range_from_good_bad(
+                        inputs, input_key, base_lower, base_upper, good_nums, bad_nums
+                    )
+                    print(f"Updated {node_key}:{input_key} to {msg}", flush=True)
+                else:
+                    msg = update_range_fallback(inputs, input_key, good_set, bad_set)
+                    print(f"Updated {node_key}:{input_key} using fallback: {msg}", flush=True)
+    return base_workflow_value
+
 
 def update_ranges_by_quality_control(run_workflow_ids, base_workflow, threshold, db):
-    good_workflows = filter_good_workflows(run_workflow_ids, threshold, db)
+    good_workflows, bad_workflows = sort_workflows(run_workflow_ids, threshold, db)
     
     if good_workflows:
-        combined_assessments = combine_differing_inputs(good_workflows)
-        updated_base_workflow = convert_and_adjust_values(base_workflow, combined_assessments)
+        print(f"num good workflows: {len(good_workflows)}", flush=True)
+        good_tune_vals = combine_differing_inputs(good_workflows, base_workflow)
+        bad_tune_vals = combine_differing_inputs(bad_workflows, base_workflow)
+
+        print(f"good vals tuning: {good_tune_vals}", flush=True)
+        print(f"bad vals tuning: {bad_tune_vals}", flush=True)
+
+        updated_base_workflow = convert_and_adjust_values(base_workflow, good_tune_vals, bad_tune_vals)
     else:
         updated_base_workflow = extend_ranges_from_base(base_workflow)
     
+    if len(updated_base_workflow.keys()) == 1 and 'value' not in updated_base_workflow:
+        updated_base_workflow = {'value': updated_base_workflow}
+
     return updated_base_workflow

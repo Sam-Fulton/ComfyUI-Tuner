@@ -25,7 +25,7 @@ def rerun():
             return jsonify({"error": "Base workflow not found"}), 400
 
         updated_base_workflow = update_ranges_by_quality_control(run_workflow_ids, base_workflow, threshold, db)
-
+        
         return jsonify({'updated_workflow': updated_base_workflow}), 200
     
     except ValueError as e:
