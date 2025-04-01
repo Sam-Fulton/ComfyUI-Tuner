@@ -1,30 +1,26 @@
 import pytest
-from flask import Flask, request, json
-from unittest.mock import patch, MagicMock
+from flask import Flask, request
+from unittest.mock import patch
 import os
 from bson import ObjectId
-from app.utils.utils import get_output_paths, new_outputs, convert_objectid_to_str, extract_and_validate_json
+from app.utils.utils import get_output_paths, new_outputs, convert_objectid_to_str, extract_and_validate_json, to_num
 
-sample_workflow = {
-    "1": {
-        "class_type": "SaveImage",
-        "inputs": {
-            "filename": "image_1.png"
-        }
-    },
-    "2": {
-        "class_type": "SaveVideo",
-        "inputs": {
-            "filename": "video_1.mp4"
-        }
-    },
-    "3": {
-        "class_type": "Transform",
-        "inputs": {
-            "input_file": "image_2.png"
+@pytest.fixture
+def sample_workflow():
+    return {
+        "1": {
+            "class_type": "SaveImage",
+            "inputs": {
+                "filename_prefix": "image_1.png"
+            }
+        },
+        "2": {
+            "class_type": "SaveVideo",
+            "inputs": {
+                "filename_prefix": "video_1.mp4"
+            }
         }
     }
-}
 
 @pytest.fixture
 def mock_os_path_exists():
@@ -50,11 +46,25 @@ def app():
 def client(app):
     return app.test_client()
 
-def test_get_output_paths(mock_os_path_exists, mock_os_walk):
+@patch("app.utils.utils.os.walk")
+@patch("app.utils.utils.os.path.exists")
+def test_get_output_paths(mock_exists, mock_walk, sample_workflow):
+    mock_exists.return_value = True
+
+    base_dir = "/backend/ComfyUI/output"
+    mock_walk.return_value = [
+        (base_dir, [], ["image_1.png", "video_1.mp4"])
+    ]
+
     output_files = get_output_paths(sample_workflow)
-    assert len(output_files) == 2
-    assert os.path.normpath("/app/ComfyUI/output/image_1.png") in map(os.path.normpath, output_files)
-    assert os.path.normpath("/app/ComfyUI/output/video_1.mp4") in map(os.path.normpath, output_files)
+    
+    expected_image = os.path.join(base_dir, "image_1.png")
+    expected_video = os.path.join(base_dir, "video_1.mp4")
+
+    normalized = list(map(os.path.normpath, output_files))
+    assert len(normalized) == 2
+    assert os.path.normpath(expected_image) in normalized
+    assert os.path.normpath(expected_video) in normalized
 
 def test_get_output_paths_no_save_class(mock_os_path_exists, mock_os_walk):
     no_save_workflow = {
@@ -111,3 +121,18 @@ def test_extract_and_validate_json_no_payload(app):
             assert result is None
             assert error_response.json == {"error": "No valid JSON data was supplied"}
             assert status_code == 400
+
+def test_to_num_int():
+    assert to_num("42") == 42
+    assert to_num(42) == 42
+
+def test_to_num_float():
+    assert to_num("3.14") == 3.14
+    assert to_num("0.5") == 0.5
+
+def test_to_num_invalid():
+    assert to_num("abc") is None
+    assert to_num("4a") is None
+
+def test_to_num_edge_cases():
+    assert to_num("") is None

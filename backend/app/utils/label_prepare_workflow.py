@@ -63,9 +63,6 @@ def prepare_run_workflow(base_workflow):
 
 
 def extract_base_workflow(base_workflow):
-    if 'value' in base_workflow.keys():
-        base_workflow_value = base_workflow['value']
-    else:
-        base_workflow_value = base_workflow
+    base_workflow_value = base_workflow.get('value', base_workflow)
 
     return base_workflow_value

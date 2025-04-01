@@ -1,4 +1,5 @@
 from app.utils.utils import to_num
+from app.utils.label_prepare_workflow import extract_base_workflow
 
 def update_range_from_good_bad(inputs, input_key, base_lower, base_upper, good_nums, bad_nums):
     good_mean = sum(good_nums) / len(good_nums)
@@ -105,8 +106,7 @@ def extend_range(values, min_allowed=0):
     return [max(min_allowed, lower - diff), upper + diff]
 
 def extend_ranges_from_base(base_workflow):
-    workflow_data = base_workflow.get('value', base_workflow)
-
+    workflow_data = extract_base_workflow(base_workflow)
     for node_data in workflow_data.values():
         inputs = node_data.get('inputs', {})
         for input_key, input_val in inputs.items():
